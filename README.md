@@ -12,7 +12,8 @@ This mod fixes several annoying issues with Meteor's ClickGUI category windows:
 * **Positions are remembered.** Category positions persist when closing and reopening the ClickGUI, and across game restarts.
 
 Preview: 
-<img width="800" height="352" alt="1002463004" src="https://github.com/user-attachments/assets/9f00f216-0729-4685-9c1d-f88faf189f75" />
+
+https://github.com/user-attachments/assets/1bb8f888-2d3f-47eb-8866-c218c2826f7a
 
 
 The goal is simple: **your ClickGUI stays organized the way you left it.**
