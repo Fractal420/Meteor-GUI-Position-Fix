@@ -46,7 +46,3 @@ The built addon JAR will be available in:
 ```text
 build/libs/
 ```
-
-## Version
-
-**1.0.0 — First release**
