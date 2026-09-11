@@ -1,0 +1,27 @@
+# Gradle
+.gradle/
+build/
+out/
+classes/
+
+# Keep the built JAR in build/libs tracked
+!build/
+!build/libs/
+!build/libs/*.jar
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Fabric
+run/
+
+# Java crash/log files
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+
+# Local Meteor dependency
+libs/meteor-client-1.21.11-local.jar

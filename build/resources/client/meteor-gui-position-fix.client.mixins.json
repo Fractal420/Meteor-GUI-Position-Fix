@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "package": "com.meteorfix.gui.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "WContainerMoveMixin",
+    "WContainerHitOrderMixin",
+    "WWindowLayoutMixin",
+    "WWindowClampMixin",
+    "WWindowTitleAccessor",
+    "WHeaderReleaseMixin"
+  ],
+
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

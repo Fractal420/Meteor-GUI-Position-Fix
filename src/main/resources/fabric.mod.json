@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "meteor-gui-position-fix",
+  "version": "${version}",
+  "name": "Meteor GUI Position Fix",
+  "description": "Auto-pins every ClickGUI category window to its position after first layout (no drag required), keeps it there on reopen, clamps windows so they can't be dragged off screen, and on mouse-release snaps categories so they never overlap each other.",
+  "authors": ["OpenAI"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "meteor": [
+      "com.meteorfix.gui.MeteorGuiPositionFix"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "meteor-gui-position-fix.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "minecraft": "~1.21.11",
+    "fabricloader": ">=0.19.5",
+    "meteor-client": "*"
+  }
+}

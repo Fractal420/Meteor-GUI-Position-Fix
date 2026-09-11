@@ -1,0 +1,78 @@
+plugins {
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+	id 'maven-publish'
+}
+
+repositories {
+	flatDir {
+		dirs 'libs'
+	}
+	maven {
+		name = 'meteor-releases'
+		url = uri('https://maven.meteordev.org/releases')
+	}
+	maven {
+		name = 'meteor-snapshots'
+		url = uri('https://maven.meteordev.org/snapshots')
+	}
+}
+
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"meteor-gui-position-fix" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Local Meteor Client API used only to compile against. It must NOT be
+	// pulled onto the runtime classpath: the player already has their own
+	// real Meteor Client installed, and loading this bundled copy as well
+	// risks a duplicate "meteor-client" mod being present at once.
+	modCompileOnly files("libs/meteor-client-1.21.11-local.jar")
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21
+}
+
+java {
+	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+	def projectName = project.name
+	inputs.property "projectName", projectName
+
+	from("LICENSE") {
+		rename { "${it}_${projectName}" }
+	}
+}
+
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			from components.java
+		}
+	}
+}
