@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "meteor-gui-position-fix",
-  "version": "1.0.0-1.21.11",
+  "version": "1.0.1-1.21.11",
   "name": "Meteor GUI Position Fix",
   "description": "Keeps Meteor ClickGUI window positions stable, prevents search resizing and category reflow, snaps only the dragged window on release, prioritizes expanded setting popups, and supports custom themes.",
   "authors": [
