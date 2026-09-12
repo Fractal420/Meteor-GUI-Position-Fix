@@ -3,8 +3,10 @@
   "id": "meteor-gui-position-fix",
   "version": "${version}",
   "name": "Meteor GUI Position Fix",
-  "description": "Auto-pins every ClickGUI category window to its position after first layout (no drag required), keeps it there on reopen, clamps windows so they can't be dragged off screen, and on mouse-release snaps categories so they never overlap each other.",
-  "authors": ["OpenAI"],
+  "description": "Keeps Meteor ClickGUI window positions stable, prevents search resizing and category reflow, snaps only the dragged window on release, prioritizes expanded setting popups, and supports custom themes.",
+  "authors": [
+    "OpenAI"
+  ],
   "license": "MIT",
   "environment": "client",
   "entrypoints": {

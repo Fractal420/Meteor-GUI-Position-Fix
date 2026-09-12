@@ -6,6 +6,8 @@
     "WContainerMoveMixin",
     "WContainerHitOrderMixin",
     "WCategoryControllerLayoutMixin",
+    "CatppuccinCategoryControllerLayoutMixin",
+    "CatppuccinHeaderReleaseMixin",
     "WSearchWindowSizeMixin",
     "WWindowLayoutMixin",
     "WWindowClampMixin",

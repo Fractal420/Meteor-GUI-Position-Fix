@@ -1,4 +1,3 @@
-
 package com.meteorfix.gui;
 
 import com.google.gson.Gson;
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -33,7 +33,6 @@ public final class WindowPositionMemory {
     private static final AtomicBoolean LOGGED_FIRST_MOVE = new AtomicBoolean(false);
     private static final AtomicBoolean LOGGED_FIRST_RESOLVE = new AtomicBoolean(false);
 
-    
     private static final ThreadLocal<Boolean> CLAMPING = ThreadLocal.withInitial(() -> false);
 
     private static final Gson GSON = new Gson();
@@ -44,18 +43,19 @@ public final class WindowPositionMemory {
     private static final Map<String, double[]> POSITIONS = new ConcurrentHashMap<>();
     private static volatile boolean loaded = false;
 
-    
     private static final Set<WWindow> ACTIVE_WINDOWS =
         Collections.newSetFromMap(new WeakHashMap<>());
 
-    
     private static final double GAP = 4.0;
 
     private static Field EXPANDED_FIELD;
     private static Field ANIM_PROGRESS_FIELD;
     private static Field HEADER_FIELD;
     private static Field DRAGGING_FIELD;
+    private static Field CATPPUCCIN_ANIMATION_FIELD;
+    private static Method CATPPUCCIN_ANIM_PROGRESS_METHOD;
     private static boolean reflectionReady = false;
+    private static boolean catppuccinReflectionReady = false;
 
     static {
         try {
@@ -71,6 +71,16 @@ public final class WindowPositionMemory {
         } catch (Throwable t) {
             LOGGER.warn("[MeteorGuiPositionFix] Could not prepare reflection for WWindow state.", t);
         }
+
+        try {
+            Class<?> catWindow = Class.forName("me.pindour.catppuccin.gui.themes.catppuccin.widgets.container.WCatppuccinWindow");
+            CATPPUCCIN_ANIMATION_FIELD = catWindow.getDeclaredField("animation");
+            CATPPUCCIN_ANIMATION_FIELD.setAccessible(true);
+            Class<?> animClass = Class.forName("me.pindour.catppuccin.api.animation.Animation");
+            CATPPUCCIN_ANIM_PROGRESS_METHOD = animClass.getMethod("getProgress");
+            catppuccinReflectionReady = true;
+        } catch (Throwable ignored) {
+        }
     }
 
     private WindowPositionMemory() {
@@ -80,7 +90,6 @@ public final class WindowPositionMemory {
         return Boolean.TRUE.equals(CLAMPING.get());
     }
 
-    
     public static void afterLayout(WWindow window) {
         ensureLoaded();
         ACTIVE_WINDOWS.add(window);
@@ -93,8 +102,6 @@ public final class WindowPositionMemory {
         if (key != null) {
             double[] saved = POSITIONS.get(key);
             if (saved != null) {
-                
-                
                 double dx = saved[0] - window.x;
                 double dy = saved[1] - window.y;
                 if (dx != 0 || dy != 0) {
@@ -114,7 +121,6 @@ public final class WindowPositionMemory {
         clampToScreen(window);
     }
 
-    
     public static void afterMove(WWindow window) {
         if (isClamping()) return;
 
@@ -127,12 +133,9 @@ public final class WindowPositionMemory {
         String key = keyFor(window);
         if (key == null) return;
 
-        
-        
         POSITIONS.put(key, new double[]{window.x, window.y});
     }
 
-    
     public static void afterDragEnd(WWindow window) {
         if (isClamping()) return;
 
@@ -153,15 +156,12 @@ public final class WindowPositionMemory {
         save();
     }
 
-    
     public static void clampToScreen(WWindow window) {
-        
-        
-        
         final double topBar = 40.0;
+        double headerH = headerHeight(window);
 
         double maxX = Utils.getWindowWidth() - window.width;
-        double maxY = Utils.getWindowHeight() - effectiveHeight(window);
+        double maxY = Utils.getWindowHeight() - headerH;
 
         double newX = window.x;
         double newY = window.y;
@@ -176,8 +176,6 @@ public final class WindowPositionMemory {
 
         if (dx == 0 && dy == 0) return;
 
-        
-        
         CLAMPING.set(true);
         try {
             window.move(dx, dy);
@@ -186,7 +184,6 @@ public final class WindowPositionMemory {
         }
     }
 
-    
     public static void resolveOverlaps(WWindow window) {
         List<WWindow> others = collectSiblings(window);
         if (others.isEmpty()) return;
@@ -196,7 +193,6 @@ public final class WindowPositionMemory {
         final double ww = window.width;
         final double wh = effectiveHeight(window);
 
-        
         if (isFree(originX, originY, ww, wh, others)) return;
 
         final double topBar = 40.0;
@@ -205,14 +201,13 @@ public final class WindowPositionMemory {
         final double minX = 0;
         final double minY = topBar;
         final double maxX = Math.max(minX, screenW - ww);
-        final double maxY = Math.max(minY, screenH - wh);
+        final double maxY = Math.max(minY, screenH - headerHeight(window));
 
         double bestX = originX;
         double bestY = originY;
         double bestDist = Double.POSITIVE_INFINITY;
         boolean found = false;
 
-        
         for (WWindow other : others) {
             double ox = other.x;
             double oy = other.y;
@@ -220,15 +215,10 @@ public final class WindowPositionMemory {
             double oh = effectiveHeight(other);
 
             double[][] sideCandidates = {
-                
                 { ox + ow + GAP, originY },
-                
                 { ox - ww - GAP, originY },
-                
                 { originX, oy + oh + GAP },
-                
                 { originX, oy - wh - GAP },
-                
                 { ox + ow + GAP, oy },
                 { ox - ww - GAP, oy },
                 { ox, oy + oh + GAP },
@@ -253,15 +243,12 @@ public final class WindowPositionMemory {
             }
         }
 
-        
-        
-        
         final double step = 8.0;
-        final int maxRings = 80; 
+        final int maxRings = 80;
 
         for (int ring = 1; ring <= maxRings; ring++) {
             double radius = ring * step;
-            
+
             int samples = Math.max(8, (int) (2 * Math.PI * radius / step));
             for (int s = 0; s < samples; s++) {
                 double angle = (2 * Math.PI * s) / samples;
@@ -276,14 +263,11 @@ public final class WindowPositionMemory {
                     found = true;
                 }
             }
-            
-            
+
             if (found && bestDist <= radius * radius) break;
         }
 
         if (!found) {
-            
-            
             return;
         }
 
@@ -304,14 +288,13 @@ public final class WindowPositionMemory {
         for (WWindow other : ACTIVE_WINDOWS) {
             if (other == null || other == window) continue;
             if (other.parent == null) continue;
-            
+
             if (window.parent != null && other.parent != window.parent) continue;
             others.add(other);
         }
         return others;
     }
 
-    
     private static boolean isFree(double x, double y, double w, double h, List<WWindow> others) {
         for (WWindow other : others) {
             double ox = other.x;
@@ -319,7 +302,6 @@ public final class WindowPositionMemory {
             double ow = other.width;
             double oh = effectiveHeight(other);
 
-            
             if (x < ox + ow + GAP
                 && x + w > ox - GAP
                 && y < oy + oh + GAP
@@ -342,8 +324,34 @@ public final class WindowPositionMemory {
         return v;
     }
 
-    
+    private static double headerHeight(WWindow window) {
+        if (!reflectionReady) {
+            return 28.0;
+        }
+        try {
+            Object rawHeader = HEADER_FIELD.get(window);
+            if (rawHeader instanceof WWidget header && header.height > 0) {
+                return header.height;
+            }
+        } catch (Throwable ignored) {
+        }
+        return Math.min(28.0, window.height > 0 ? window.height : 28.0);
+    }
+
     public static double effectiveHeight(WWindow window) {
+        if (isCatppuccinWindow(window) && catppuccinReflectionReady) {
+            try {
+                Object anim = CATPPUCCIN_ANIMATION_FIELD.get(window);
+                double progress = ((Number) CATPPUCCIN_ANIM_PROGRESS_METHOD.invoke(anim)).doubleValue();
+                double hh = headerHeight(window);
+                if (progress >= 0.999) {
+                    return window.height;
+                }
+                return Math.max(hh, hh + (window.height - hh) * Math.max(0.0, Math.min(1.0, progress)));
+            } catch (Throwable ignored) {
+            }
+        }
+
         if (!reflectionReady) {
             return Math.min(28.0, window.height > 0 ? window.height : 28.0);
         }
@@ -351,24 +359,20 @@ public final class WindowPositionMemory {
         try {
             boolean expanded = EXPANDED_FIELD.getBoolean(window);
             double animProgress = ANIM_PROGRESS_FIELD.getDouble(window);
-            Object rawHeader = HEADER_FIELD.get(window);
-            WWidget header = rawHeader instanceof WWidget ? (WWidget) rawHeader : null;
+            double hh = headerHeight(window);
 
             if (expanded && animProgress >= 0.999) {
                 return window.height;
             }
 
-            double headerHeight;
-            if (header != null && header.height > 0) {
-                headerHeight = header.height;
-            } else {
-                headerHeight = Math.min(28.0, window.height > 0 ? window.height : 28.0);
-            }
-
-            return (window.height - headerHeight) * animProgress + headerHeight;
+            return (window.height - hh) * animProgress + hh;
         } catch (Throwable t) {
             return Math.min(28.0, window.height > 0 ? window.height : 28.0);
         }
+    }
+
+    private static boolean isCatppuccinWindow(WWindow window) {
+        return window.getClass().getName().contains("Catppuccin");
     }
 
     private static String keyFor(WWindow window) {
