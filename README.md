@@ -4,6 +4,12 @@ A client-side Meteor Client addon that keeps your ClickGUI organized the way you
 
 Supports Minecraft **1.21.11**, **26.1** and **26.2**.
 
+
+
+https://github.com/user-attachments/assets/ccc808bc-2269-4a3d-8472-d50364f57238
+
+
+
 ## Features
 
 * **Stable category positions**  
