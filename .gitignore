@@ -1,13 +1,10 @@
 # Gradle
 .gradle/
-build/
-out/
-classes/
-
-# Keep the built JAR in build/libs tracked
-!build/
+build/**
 !build/libs/
 !build/libs/*.jar
+out/
+classes/
 
 # IDEs
 .idea/
