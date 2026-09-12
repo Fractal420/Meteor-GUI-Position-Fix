@@ -1,0 +1,76 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
+    id 'maven-publish'
+}
+
+version = "${rootProject.mod_version}-${minecraft_version}"
+group = rootProject.maven_group
+
+base {
+    archivesName = rootProject.archives_base_name
+}
+
+repositories {
+    maven { name = "Fabric"; url = "https://maven.fabricmc.net/" }
+    maven { name = "Mojang"; url = "https://libraries.minecraft.net/" }
+    maven { name = "Meteor Releases"; url = "https://maven.meteordev.org/releases" }
+    maven { name = "Meteor Snapshots"; url = "https://maven.meteordev.org/snapshots" }
+    flatDir { dirs "${rootProject.projectDir}/libs" }
+    mavenCentral()
+}
+
+loom {
+    splitEnvironmentSourceSets()
+    mods {
+        "meteor-gui-position-fix" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    compileOnly "meteordevelopment:meteor-client:${minecraft_version}-SNAPSHOT"
+}
+
+sourceSets {
+    main {
+        java { srcDirs = [] }
+        resources { srcDirs = ["${rootProject.projectDir}/src/main/resources"] }
+    }
+    client {
+        java { srcDirs = ["${rootProject.projectDir}/src/client/java"] }
+        resources { srcDirs = ["${rootProject.projectDir}/src/client/resources"] }
+    }
+}
+
+processResources {
+    def ver = version
+    def mc = minecraft_version
+    inputs.property "version", ver
+    inputs.property "minecraft_version", mc
+    filesMatching("fabric.mod.json") {
+        expand "version": ver, "minecraft_version": mc
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = "UTF-8"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+    withSourcesJar()
+}
+
+jar {
+    def baseName = rootProject.archives_base_name
+    from("${rootProject.projectDir}/LICENSE") {
+        rename { original -> "${original}_${baseName}" }
+    }
+}

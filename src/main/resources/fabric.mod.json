@@ -21,7 +21,7 @@
     }
   ],
   "depends": {
-    "minecraft": "~1.21.11",
+    "minecraft": "~${minecraft_version}",
     "fabricloader": ">=0.19.5",
     "meteor-client": "*"
   }

@@ -1,12 +1,43 @@
 pluginManagement {
-	repositories {
-		maven {
-			name = 'Fabric'
-			url = 'https://maven.fabricmc.net/'
-		}
-		mavenCentral()
-		gradlePluginPortal()
-	}
+    repositories {
+        maven {
+            name = "Fabric"
+            url = "https://maven.fabricmc.net/"
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
 }
 
-rootProject.name = 'meteor-gui-position-fix'
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        maven {
+            name = "Fabric"
+            url = "https://maven.fabricmc.net/"
+        }
+        maven {
+            name = "Mojang"
+            url = "https://libraries.minecraft.net/"
+        }
+        maven {
+            name = "Meteor Releases"
+            url = "https://maven.meteordev.org/releases"
+        }
+        maven {
+            name = "Meteor Snapshots"
+            url = "https://maven.meteordev.org/snapshots"
+        }
+        mavenCentral()
+    }
+}
+
+rootProject.name = "meteor-gui-position-fix"
+
+include("1.21.11")
+include("26.1")
+include("26.2")
+
+project(":1.21.11").projectDir = file("versions/1.21.11")
+project(":26.1").projectDir = file("versions/26.1")
+project(":26.2").projectDir = file("versions/26.2")

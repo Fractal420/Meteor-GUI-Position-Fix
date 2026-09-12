@@ -1,8 +1,7 @@
 # Gradle
 .gradle/
-build/**
-!build/libs/
-!build/libs/*.jar
+build/
+**/build/
 out/
 classes/
 
@@ -13,6 +12,7 @@ classes/
 
 # Fabric
 run/
+**/run/
 
 # Java crash/log files
 hs_err_*.log
@@ -20,5 +20,6 @@ replay_*.log
 *.hprof
 *.jfr
 
-# Local Meteor dependency
-libs/meteor-client-1.21.11-local.jar
+# Local Meteor dependency JARs (keep the folder)
+libs/*.jar
+!libs/.gitkeep

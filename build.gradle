@@ -1,78 +1,43 @@
-plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
-	id 'maven-publish'
+tasks.register("buildAll") {
+    group = "build"
+    description = "Build the mod for every supported Minecraft version"
+    dependsOn(":1.21.11:build", ":26.1:build", ":26.2:build")
 }
 
-repositories {
-	flatDir {
-		dirs 'libs'
-	}
-	maven {
-		name = 'meteor-releases'
-		url = uri('https://maven.meteordev.org/releases')
-	}
-	maven {
-		name = 'meteor-snapshots'
-		url = uri('https://maven.meteordev.org/snapshots')
-	}
-}
+def selected = findProperty("mc") ?: findProperty("minecraft_version")
 
-loom {
-	splitEnvironmentSourceSets()
+if (selected != null) {
+    def targetPath = ":${selected}"
+    tasks.register("build") {
+        group = "build"
+        description = "Build the selected Minecraft version (${selected})"
+        dependsOn("${targetPath}:build")
+        doLast {
+            copy {
+                from project(targetPath).layout.buildDirectory.dir("libs")
+                into layout.buildDirectory.dir("libs")
+                include "*.jar"
+            }
+            logger.lifecycle("Built jars for ${selected} are in build/libs/ and versions/${selected}/build/libs/")
+        }
+    }
+} else {
+    tasks.register("build") {
+        group = "build"
+        description = "Print build help (no -Pmc given)"
+        doLast {
+            logger.lifecycle("""
+No Minecraft version selected.
 
-	mods {
-		"meteor-gui-position-fix" {
-			sourceSet sourceSets.main
-			sourceSet sourceSets.client
-		}
-	}
-}
-
-dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-
-
-	
-
-	
-	modCompileOnly "meteordevelopment:meteor-client:${project.minecraft_version}-SNAPSHOT"
-}
-
-processResources {
-	def version = project.version
-	inputs.property "version", version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": version
-	}
-}
-
-tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
-}
-
-java {
-	withSourcesJar()
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
-}
-
-jar {
-	def projectName = project.name
-	inputs.property "projectName", projectName
-
-	from("LICENSE") {
-		rename { "${it}_${projectName}" }
-	}
-}
-
-publishing {
-	publications {
-		create("mavenJava", MavenPublication) {
-			from components.java
-		}
-	}
+Usage examples:
+  ./gradlew build -Pmc=1.21.11
+  ./gradlew build -Pmc=26.1
+  ./gradlew build -Pmc=26.2
+  ./gradlew :1.21.11:build
+  ./gradlew :26.1:build
+  ./gradlew :26.2:build
+  ./gradlew buildAll
+""")
+        }
+    }
 }

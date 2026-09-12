@@ -1,12 +1,8 @@
 # Meteor GUI Position Fix
 
-A client-side Meteor Client addon for Minecraft 1.21.11 that keeps your ClickGUI organized the way you left it.
+A client-side Meteor Client addon that keeps your ClickGUI organized the way you left it.
 
-
-
-https://github.com/user-attachments/assets/5ccbb9a4-af4f-4200-8d69-433fea4ab1b1
-
-
+Supports Minecraft **1.21.11**, **26.1** and **26.2**.
 
 ## Features
 
@@ -29,12 +25,12 @@ https://github.com/user-attachments/assets/5ccbb9a4-af4f-4200-8d69-433fea4ab1b1
   Expanded setting dropdowns receive clicks first, even when they overlap other settings. Works for both module settings and Meteor’s own settings.
 
 * **Catppuccin theme support**  
-  Fully compatible with [Catppuccin](https://github.com/X-C-0/catppuccin-addon) themes. Category windows can be freely dragged (including below the middle of the screen) and keep correct positions after release.
+  Fully compatible with Catppuccin themes. Category windows can be freely dragged and keep correct positions after release.
 
 ## Installation
 
-1. Install the matching version of **Meteor Client** for Minecraft 1.21.11.
-2. Download the `Meteor GUI Position Fix` JAR.
+1. Install the matching version of **Meteor Client** for your Minecraft version.
+2. Download the `Meteor GUI Position Fix` JAR that matches your Minecraft version.
 3. Place the JAR in your Minecraft `mods` folder alongside Meteor.
 4. Launch the game and open the Meteor ClickGUI.
 
@@ -42,20 +38,48 @@ No configuration is required.
 
 ## Building from source
 
-Before building, place your **Meteor Client 1.21.11** JAR in the project's `libs` folder and rename it to:
+This is a multi-version project. Shared sources live in `src/`. Each Minecraft version is a subproject under `versions/`.
 
-```text
-meteor-client-1.21.11-local.jar
-```
-
-Then run:
+Build a specific version:
 
 ```bash
-./gradlew clean build
+./gradlew build -Pmc=1.21.11
+./gradlew build -Pmc=26.1
+./gradlew build -Pmc=26.2
 ```
 
-The built addon JAR will be available in:
+Or target the subproject directly:
+
+```bash
+./gradlew :1.21.11:build
+./gradlew :26.1:build
+./gradlew :26.2:build
+```
+
+Build every version:
+
+```bash
+./gradlew buildAll
+```
+
+Built JARs appear in `build/libs/` (when using `-Pmc=...`) and in `versions/<mc>/build/libs/`.
+
+### Meteor Client dependency
+
+The build resolves `meteor-client` from the official Meteor Maven (`https://maven.meteordev.org/snapshots`) as a compile-only dependency:
+
+```
+meteordevelopment:meteor-client:<minecraft_version>-SNAPSHOT
+```
+
+You normally do **not** need to place any Meteor JARs manually.
+
+If the SNAPSHOT cannot be resolved (offline build, Maven outage, etc.), create a `libs/` folder in the project root and place a renamed Meteor Client JAR there, for example:
 
 ```text
-build/libs/
+libs/meteor-client-1.21.11-SNAPSHOT.jar
+libs/meteor-client-26.1-SNAPSHOT.jar
+libs/meteor-client-26.2-SNAPSHOT.jar
 ```
+
+The `flatDir` repository will pick it up automatically.
