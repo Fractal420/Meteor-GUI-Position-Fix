@@ -5,12 +5,14 @@
   "client": [
     "WContainerMoveMixin",
     "WContainerHitOrderMixin",
+    "WCategoryControllerLayoutMixin",
+    "WSearchWindowSizeMixin",
     "WWindowLayoutMixin",
     "WWindowClampMixin",
     "WWindowTitleAccessor",
+    "WWindowDragStateAccessor",
     "WHeaderReleaseMixin"
   ],
-
   "injectors": {
     "defaultRequire": 1
   },
