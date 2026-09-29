@@ -1,6 +1,5 @@
-This fix was implemented in my fork of Nora Tweaks addon:
+This repository will not be updated, fix was fully moved to my fork of Nora Tweaks addon:
 https://github.com/Fractal420/Nora-Tweaks
-
 
 
 # Meteor GUI Position Fix
