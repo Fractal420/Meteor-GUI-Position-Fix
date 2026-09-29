@@ -1,3 +1,8 @@
+This fix was implemented in my fork of Nora Tweaks addon:
+https://github.com/Fractal420/Nora-Tweaks
+
+
+
 # Meteor GUI Position Fix
 
 A client-side Meteor Client addon that keeps your ClickGUI organized the way you left it.
